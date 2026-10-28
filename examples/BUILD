@@ -25,3 +25,17 @@ cc_binary(
     ],
     linkopts = ["-pthread"],
 )
+
+cc_binary(
+    name = "order_book_example",
+    srcs = ["order_book_example.cpp"],
+    copts = [
+        "-Wall",
+        "-Wextra",
+        "-Werror",
+        "-Wpedantic",
+    ],
+    deps = [
+        "//exchange/matcher:order_book",
+    ],
+)

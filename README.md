@@ -46,3 +46,15 @@ Units are ticks of the 24 MHz ARM64 system counter (1 tick ≈ 41.7 ns), see `co
 | Iterate (total)       | 10,381,976 |  26,962,480 |    10,714,211 |
 
 Takeaways: unordered_map wins every lookup; vector wins insert and iterate; map is slowest but is the only one that keeps keys sorted.
+
+
+## Workshops 2–3: memory pool and order book
+
+- `common/mem_pool.h` — `MemPool<T>`: fixed-capacity object pool. One allocation up front; `allocate()` / `deallocate()` never touch the heap and construct / destroy objects in place (`std::construct_at` / `std::destroy_at`). Free flags live in a bit-packed `std::vector<bool>` separate from the object slots (structure of arrays), so the free-slot scan only touches the flags.
+- `exchange/matcher/order.h` — `Order`: plain data plus `toString()`. Prices are integer ticks (1 tick = $0.01).
+- `exchange/matcher/order_book.h` — `OrderBook` with `add()`, `cancel()`, `toString()`. Orders live in a `MemPool<Order>`; `std::unordered_map` gives O(1) cancel by id; `std::map` keeps bid / ask levels sorted with the best price at `begin()`; orders at one price form an intrusive FIFO list through `Order::prev` / `Order::next`.
+
+```bash
+bazel test //...                            # 5 tests
+bazel run //examples:order_book_example     # add / cancel walkthrough
+```
